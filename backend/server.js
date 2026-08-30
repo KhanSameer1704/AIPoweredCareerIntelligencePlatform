@@ -1,29 +1,45 @@
 const express = require("express");
 const cors = require("cors");
 const dotenv = require("dotenv");
-const connectDB = require("./config/db");
 
-// Load environment variables
+const protect = require("./middlewares/authMiddleware");
+const connectDB = require("./config/db");
+const authRoutes = require("./routes/authRoutes");
+const profileRoutes = require("./routes/profileRoutes");
+const careerRoutes = require("./routes/careerRoutes");
+
 dotenv.config();
 
-connectDB(); // Connect to MongoDB
-
-// Create Express application
 const app = express();
 
-// Middleware
+connectDB();
+
 app.use(cors());
 app.use(express.json());
 
-// Test Route
 app.get("/", (req, res) => {
-    res.send("🚀 LinkedIn Analyzer Backend is Running!");
+  res.send("🚀 AI Powered Career Intelligence Platform!");
 });
 
-// Define Port
-const PORT = process.env.PORT || 5000;
+// Temporary protected route for testing JWT
+app.get("/api/protected", protect, (req, res) => {
+  res.status(200).json({
+    message: "You have access to the protected route!",
+    userId: req.userId,
+  });
+});
 
-// Start Server
+// Authentication routes
+app.use("/api/auth", authRoutes);
+
+// Profile routes
+app.use("/api/profile", profileRoutes);
+
+// Career routes
+app.use("/api/career", careerRoutes);
+
+const PORT = process.env.PORT || 5001;
+
 app.listen(PORT, () => {
-    console.log(`🚀 Server is running on port ${PORT}`);
+  console.log(`🚀 Server is running on port ${PORT}`);
 });
