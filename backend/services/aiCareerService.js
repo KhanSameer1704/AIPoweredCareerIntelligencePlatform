@@ -1,8 +1,12 @@
 const OpenAI = require("openai");
 
-const client = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
+let client = null;
+
+if (process.env.OPENAI_API_KEY) {
+  client = new OpenAI({
+    apiKey: process.env.OPENAI_API_KEY,
+  });
+}
 
 const generateCareerInsights = async ({
   profile,
@@ -10,6 +14,9 @@ const generateCareerInsights = async ({
   skillGap,
   recommendations,
 }) => {
+  if (!client) {
+    throw new Error("OPENAI_API_KEY is not configured");
+  }
   const prompt = `
 You are an AI career advisor.
 
