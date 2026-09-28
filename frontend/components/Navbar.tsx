@@ -21,12 +21,11 @@ export default function Navbar() {
         {/* Logo */}
         <Link href="/" className="flex items-center">
           <Image
-            src="/logo.png"
-            alt="LinkedIn Analyzer"
-            width={180}
-            height={50}
-            className="h-auto w-[180px] object-contain"
-            priority
+              src="/logo.png"
+              alt="LinkedIn Analyzer"
+              width={120}
+              height={40}
+              className="h-10 w-auto"
           />
         </Link>
 
