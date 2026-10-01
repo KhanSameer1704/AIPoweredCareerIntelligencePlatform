@@ -1,51 +1,28 @@
-const OpenAI = require("openai");
-
-let client = null;
-
-if (process.env.OPENAI_API_KEY) {
-  client = new OpenAI({
-    apiKey: process.env.OPENAI_API_KEY,
-  });
-}
-
 const generateCareerInsights = async ({
   profile,
   score,
   skillGap,
   recommendations,
 }) => {
-  if (!client) {
-    throw new Error("OPENAI_API_KEY is not configured");
-  }
-  const prompt = `
-You are an AI career advisor.
+  try {
+    const prompt = `
+You are an AI Career Intelligence Assistant.
 
-Analyze the following candidate's career profile and provide practical,
-personalized career guidance.
+Analyze the following candidate information and provide practical career guidance.
 
-CANDIDATE PROFILE:
-Name: ${profile.fullName}
-Headline: ${profile.headline || "Not provided"}
-About: ${profile.about || "Not provided"}
-Target Role: ${profile.targetRole || "Not provided"}
-Career Goals: ${profile.careerGoals || "Not provided"}
+PROFILE:
+${JSON.stringify(profile, null, 2)}
 
-SKILLS:
-${(profile.skills || []).join(", ")}
-
-PROFILE SCORE:
-${score.score}/100
-
-SCORE BREAKDOWN:
-${JSON.stringify(score.breakdown)}
+CAREER PROFILE SCORE:
+${JSON.stringify(score, null, 2)}
 
 SKILL GAP:
-${JSON.stringify(skillGap)}
+${JSON.stringify(skillGap, null, 2)}
 
 CAREER RECOMMENDATIONS:
-${JSON.stringify(recommendations)}
+${JSON.stringify(recommendations, null, 2)}
 
-Provide the response in the following format:
+Provide the response using exactly these sections:
 
 1. Profile Summary
 2. Career Assessment
@@ -54,16 +31,47 @@ Provide the response in the following format:
 5. Recommended Projects
 6. Career Next Steps
 
-Keep the advice practical and specific to the candidate.
-Do not invent experience, education, or skills that are not present.
+Important rules:
+- Use only information provided in the profile and analysis.
+- Do not invent skills, education, experience, projects, or certifications.
+- Give practical and concise recommendations.
+- Keep the response suitable for a college career intelligence project.
 `;
 
-  const response = await client.responses.create({
-    model: "gpt-5-mini",
-    input: prompt,
-  });
+    const response = await fetch(
+      "http://localhost:11434/api/generate",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          model: "llama3.2:latest",
+          prompt,
+          stream: false,
+        }),
+      }
+    );
 
-  return response.output_text;
+    if (!response.ok) {
+      const errorText = await response.text();
+
+      throw new Error(
+        `Ollama API error: ${response.status} ${errorText}`
+      );
+    }
+
+    const data = await response.json();
+
+    return data.response;
+  } catch (error) {
+    console.error(
+      "Ollama Career Insights Error:",
+      error.message
+    );
+
+    throw error;
+  }
 };
 
 module.exports = generateCareerInsights;

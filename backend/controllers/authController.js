@@ -13,6 +13,20 @@ const signup = async (req, res) => {
       });
     }
 
+    // Validate email format
+    if (!email.includes("@")) {
+      return res.status(400).json({
+        message: "Please provide a valid email",
+      });
+    }
+
+    // Validate password length
+    if (password.length < 6) {
+      return res.status(400).json({
+        message: "Password must be at least 6 characters",
+      });
+    }
+
     // Check if user already exists
     const existingUser = await User.findOne({ email });
 
@@ -48,6 +62,7 @@ const signup = async (req, res) => {
     });
   }
 };
+
 const login = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -109,4 +124,4 @@ const login = async (req, res) => {
   }
 };
 
-module.exports = { signup , login };
+module.exports = { signup, login };

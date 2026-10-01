@@ -5,7 +5,6 @@ const {
   getSkillGap,
   getCareerRecommendationsForUser,
   getAICareerInsights,
-
 } = require("../controllers/careerController");
 
 const protect = require("../middlewares/authMiddleware");
@@ -23,6 +22,13 @@ router.get(
   "/recommendations",
   protect,
   getCareerRecommendationsForUser
+);
+
+// Get AI career insights
+router.get(
+  "/ai-insights",
+  protect,
+  getAICareerInsights
 );
 
 module.exports = router;

@@ -1,9 +1,13 @@
 const Profile = require("../models/Profile");
+
 const calculateProfileScore = require("../services/careerScoringService");
+
 const analyzeSkillGap = require("../services/skillGapService");
+
 const getCareerRecommendations = require(
   "../services/careerRecommendationService"
 );
+
 const generateCareerInsights = require("../services/aiCareerService");
 
 // Get Profile Score
@@ -158,5 +162,5 @@ module.exports = {
   getProfileScore,
   getSkillGap,
   getCareerRecommendationsForUser,
-
+  getAICareerInsights,
 };
