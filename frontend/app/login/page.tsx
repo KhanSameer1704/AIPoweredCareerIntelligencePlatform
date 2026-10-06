@@ -1,6 +1,54 @@
+"use client";
+
 import Link from "next/link";
+import { useState } from "react";
 
 export default function LoginPage() {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    setError("");
+    setLoading(true);
+
+    try {
+      const response = await fetch("http://localhost:5001/api/auth/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email,
+          password,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        setError(data.message || "Login failed");
+        return;
+      }
+
+      // Save JWT token
+      localStorage.setItem("token", data.token);
+
+      console.log("Login successful:", data);
+
+      // Temporary: go to home after successful login
+      window.location.href = "/";
+    } catch (error) {
+      console.error("Login error:", error);
+      setError("Unable to connect to the backend");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-indigo-950 to-purple-900 flex items-center justify-center px-4">
       <div className="w-full max-w-md bg-white rounded-2xl shadow-2xl p-8">
@@ -17,7 +65,7 @@ export default function LoginPage() {
         </div>
 
         {/* Login Form */}
-        <form className="space-y-5">
+        <form onSubmit={handleLogin} className="space-y-5">
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -27,6 +75,9 @@ export default function LoginPage() {
             <input
               type="email"
               placeholder="Enter your email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
               className="input input-bordered w-full bg-white text-gray-900"
             />
           </div>
@@ -39,6 +90,9 @@ export default function LoginPage() {
             <input
               type="password"
               placeholder="Enter your password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
               className="input input-bordered w-full bg-white text-gray-900"
             />
           </div>
@@ -60,11 +114,19 @@ export default function LoginPage() {
             </Link>
           </div>
 
+          {/* Error message */}
+          {error && (
+            <p className="text-red-600 text-sm text-center">
+              {error}
+            </p>
+          )}
+
           <button
             type="submit"
+            disabled={loading}
             className="btn btn-primary w-full bg-indigo-600 hover:bg-indigo-700 border-none"
           >
-            Login
+            {loading ? "Logging in..." : "Login"}
           </button>
 
         </form>
