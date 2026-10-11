@@ -17,9 +17,7 @@ export default function LoginPage() {
   });
 
   const [showPassword, setShowPassword] = useState(false);
-
   const [rememberMe, setRememberMe] = useState(false);
-
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -40,7 +38,6 @@ export default function LoginPage() {
     e: React.FormEvent<HTMLFormElement>
   ) => {
     e.preventDefault();
-
     setError("");
 
     if (!formData.email.trim() || !formData.password) {
@@ -50,7 +47,7 @@ export default function LoginPage() {
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-    if (!emailRegex.test(formData.email)) {
+    if (!emailRegex.test(formData.email.trim())) {
       setError("Please enter a valid email address.");
       return;
     }
@@ -82,30 +79,23 @@ export default function LoginPage() {
         );
       }
 
-      /*
-       * Support common backend token names.
-       * Your backend may return token or accessToken.
-       */
       const token =
         data.token ||
         data.accessToken ||
         data.data?.token ||
         data.data?.accessToken;
 
-      if (token) {
-        if (rememberMe) {
-          localStorage.setItem("authToken", token);
-        } else {
-          sessionStorage.setItem("authToken", token);
-        }
+      if (!token) {
+        throw new Error(
+          "Login successful, but authentication token was not received."
+        );
       }
 
-      /*
-       * Store user information if backend returns it.
-       */
-      const user =
-        data.user ||
-        data.data?.user;
+      // Store authentication token
+      localStorage.setItem("authToken", token);
+
+      // Store user information if returned
+      const user = data.user || data.data?.user;
 
       if (user) {
         localStorage.setItem(
@@ -114,14 +104,13 @@ export default function LoginPage() {
         );
       }
 
+      // Redirect to dashboard
       router.push("/dashboard");
     } catch (err) {
       if (err instanceof Error) {
         setError(err.message);
       } else {
-        setError(
-          "Unable to login. Please try again."
-        );
+        setError("Unable to login. Please try again.");
       }
     } finally {
       setLoading(false);
@@ -131,6 +120,7 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-indigo-950 to-purple-900 flex items-center justify-center px-4">
       <div className="w-full max-w-md bg-white rounded-2xl shadow-2xl p-8">
+
         {/* Heading */}
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-gray-900">
@@ -154,6 +144,7 @@ export default function LoginPage() {
           onSubmit={handleSubmit}
           className="space-y-5"
         >
+
           {/* Email */}
           <div>
             <label
@@ -189,7 +180,9 @@ export default function LoginPage() {
                 id="password"
                 name="password"
                 type={
-                  showPassword ? "text" : "password"
+                  showPassword
+                    ? "text"
+                    : "password"
                 }
                 value={formData.password}
                 onChange={handleChange}
@@ -219,7 +212,7 @@ export default function LoginPage() {
             </div>
           </div>
 
-          {/* Remember + Forgot */}
+          {/* Remember Me */}
           <div className="flex justify-between items-center text-sm">
             <label className="flex items-center gap-2 text-gray-600">
               <input
@@ -243,7 +236,7 @@ export default function LoginPage() {
             </Link>
           </div>
 
-          {/* Login */}
+          {/* Login Button */}
           <button
             type="submit"
             disabled={loading}
@@ -296,6 +289,7 @@ export default function LoginPage() {
         >
           ← Back to Home
         </Link>
+
       </div>
     </div>
   );

@@ -1,10 +1,20 @@
 const Profile = require("../models/Profile");
-const calculateProfileScore = require("../services/careerScoringService");
-const analyzeSkillGap = require("../services/skillGapService");
+
+const calculateProfileScore = require(
+  "../services/careerScoringService"
+);
+
+const analyzeSkillGap = require(
+  "../services/skillGapService"
+);
+
 const getCareerRecommendations = require(
   "../services/careerRecommendationService"
 );
-const generateCareerInsights = require("../services/aiCareerService");
+
+const generateCareerInsights = require(
+  "../services/aiCareerService"
+);
 
 // Get Profile Score
 const getProfileScore = async (req, res) => {
@@ -21,7 +31,7 @@ const getProfileScore = async (req, res) => {
 
     const result = calculateProfileScore(profile);
 
-    res.status(200).json({
+    return res.status(200).json({
       message: "Profile score calculated successfully",
       score: result.score,
       breakdown: result.breakdown,
@@ -29,7 +39,7 @@ const getProfileScore = async (req, res) => {
   } catch (error) {
     console.error("Profile Score Error:", error.message);
 
-    res.status(500).json({
+    return res.status(500).json({
       message: "Server error",
     });
   }
@@ -59,14 +69,14 @@ const getSkillGap = async (req, res) => {
       profile.targetRole
     );
 
-    res.status(200).json({
+    return res.status(200).json({
       message: "Skill gap analyzed successfully",
       analysis: result,
     });
   } catch (error) {
     console.error("Skill Gap Error:", error.message);
 
-    res.status(500).json({
+    return res.status(500).json({
       message: "Server error",
     });
   }
@@ -89,7 +99,7 @@ const getCareerRecommendationsForUser = async (req, res) => {
       profile.skills || []
     );
 
-    res.status(200).json({
+    return res.status(200).json({
       message: "Career recommendations generated successfully",
       recommendations,
     });
@@ -99,7 +109,7 @@ const getCareerRecommendationsForUser = async (req, res) => {
       error.message
     );
 
-    res.status(500).json({
+    return res.status(500).json({
       message: "Server error",
     });
   }
@@ -108,7 +118,6 @@ const getCareerRecommendationsForUser = async (req, res) => {
 // Generate AI Career Insights
 const getAICareerInsights = async (req, res) => {
   try {
-    // Get user's profile
     const profile = await Profile.findOne({
       user: req.userId,
     });
@@ -119,21 +128,17 @@ const getAICareerInsights = async (req, res) => {
       });
     }
 
-    // Calculate profile score
     const score = calculateProfileScore(profile);
 
-    // Analyze skill gap
     const skillGap = analyzeSkillGap(
       profile.skills || [],
       profile.targetRole
     );
 
-    // Generate career recommendations
     const recommendations = getCareerRecommendations(
       profile.skills || []
     );
 
-    // Generate AI insights
     const insights = await generateCareerInsights({
       profile,
       score,
@@ -141,22 +146,26 @@ const getAICareerInsights = async (req, res) => {
       recommendations,
     });
 
-    res.status(200).json({
+    return res.status(200).json({
       message: "AI career insights generated successfully",
       insights,
     });
   } catch (error) {
-    console.error("AI Career Insights Error:", error.message);
+    console.error(
+      "AI Career Insights Error:",
+      error.message
+    );
 
-    res.status(500).json({
+    return res.status(500).json({
       message: "Failed to generate AI career insights",
     });
   }
 };
 
+// Export all controller functions
 module.exports = {
   getProfileScore,
   getSkillGap,
   getCareerRecommendationsForUser,
-
+  getAICareerInsights,
 };
